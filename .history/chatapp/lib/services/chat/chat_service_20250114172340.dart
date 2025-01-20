@@ -88,10 +88,10 @@ class ChatService {
         .limit(1)
         .snapshots()
         .map((snapshot) {
-      if (snapshot.docs.isNotEmpty) {
-        return snapshot.docs.first.data()['message'];
-      }
-      return null;
-    });
+          if (snapshot.docs.isNotEmpty) {
+            return snapshot.docs.first.data()['message'];
+          }
+          return null;
+        });
   }
 }

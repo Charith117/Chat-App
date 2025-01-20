@@ -98,8 +98,8 @@ class HomePage extends StatelessWidget {
       Map<String, dynamic> userData, BuildContext context) {
     // Only show users that have chat history with current user
     if (userData["email"] != _authService.getCurrentUser()!.email) {
-      return StreamBuilder<String?>(
-        stream: _chatService.getLastMessage(userData['uid']),
+      return FutureBuilder<String?>(
+        future: _chatService.getLastMessage(userData['uid']),
         builder: (context, messageSnapshot) {
           // Only show users with chat history
           if (messageSnapshot.hasData && messageSnapshot.data != null) {

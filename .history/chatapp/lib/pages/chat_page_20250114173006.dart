@@ -9,8 +9,7 @@ class ChatPage extends StatefulWidget {
   final String receiverEmail;
   final String receiverID;
 
-  const ChatPage(
-      {super.key, required this.receiverEmail, required this.receiverID});
+  const ChatPage({super.key, required this.receiverEmail, required this.receiverID});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -30,8 +29,7 @@ class _ChatPageState extends State<ChatPage> {
   void _sendMessage() async {
     // if there is something inside the textfield
     if (_messageController.text.isNotEmpty) {
-      await _chatService.sendMessage(
-          widget.receiverID, _messageController.text);
+      await _chatService.sendMessage(widget.receiverID, _messageController.text);
 
       // clear text controller
       _messageController.clear();
@@ -85,13 +83,6 @@ class _ChatPageState extends State<ChatPage> {
           return const Text("Loading ...");
         }
 
-        // scroll to bottom when new messages arrive
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (snapshot.data != null && snapshot.data!.docs.isNotEmpty) {
-            _scrollToBottom();
-          }
-        });
-
         // returns list view
         return ListView(
           controller: _scrollController,
@@ -118,15 +109,12 @@ class _ChatPageState extends State<ChatPage> {
     return Container(
       alignment: alignment,
       child: Column(
-        crossAxisAlignment:
-            isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          ChatBubble(
-              message: data['message'],
-              isCurrentUser: isCurrentUser,
-              onDelete: () {
-                _chatService.deleteMessage(doc.id);
-              }),
+          ChatBubble(message: data['message'], isCurrentUser: isCurrentUser, onDelete: () {
+            _chatService.deleteMessage(doc.id);
+          }),
+          
         ],
       ),
     );
@@ -166,13 +154,9 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    // Delay scrolling to bottom until after the first frame is rendered
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToBottom(); // Scroll to bottom when the chat is opened
-    });
+    _scrollToBottom();
     _scrollController.addListener(() {
-      if (_scrollController.offset >=
-              _scrollController.position.maxScrollExtent &&
+      if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
           !_scrollController.position.outOfRange) {
         _scrollToBottom();
       }

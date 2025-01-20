@@ -1,11 +1,10 @@
 import 'package:chatapp/components/my_drawer.dart';
-import 'package:chatapp/components/search_button.dart';
 import 'package:chatapp/components/user_tile.dart';
 import 'package:chatapp/pages/chat_page.dart' as chat_page;
 import 'package:chatapp/services/auth/auth_services.dart';
 import 'package:chatapp/services/chat/chat_service.dart';
 import 'package:chatapp/services/profile/profile_service.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -30,6 +29,7 @@ class HomePage extends StatelessWidget {
               color: Theme.of(context).primaryColor,
               fontWeight: FontWeight.bold),
         ),
+       
         actions: [
           IconButton(
             icon: Icon(Icons.camera_alt, color: Theme.of(context).primaryColor),
@@ -38,13 +38,9 @@ class HomePage extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: Icon(Icons.search, color: Theme.of(context).primaryColor),
+            icon: Icon(Icons.camera_alt, color: Theme.of(context).primaryColor),
             onPressed: () {
-              // Implement search functionality here
-              showSearch(
-                context: context,
-                delegate: UserSearchDelegate(),
-              );
+              // Implement camera functionality here
             },
           ),
           MyThreeDotMenu(),
@@ -96,27 +92,49 @@ class HomePage extends StatelessWidget {
   // build the individual list tile for the user
   Widget _builderUserListItem(
       Map<String, dynamic> userData, BuildContext context) {
-    // Only show users that have chat history with current user
+    // display all user except current user
     if (userData["email"] != _authService.getCurrentUser()!.email) {
-      return StreamBuilder<String?>(
-        stream: _chatService.getLastMessage(userData['uid']),
-        builder: (context, messageSnapshot) {
-          // Only show users with chat history
-          if (messageSnapshot.hasData && messageSnapshot.data != null) {
-            return FutureBuilder<Map<String, dynamic>?>(
-              future: _profileService.fetchProfile(userData['uid']),
-              builder: (context, profileSnapshot) {
-                if (profileSnapshot.hasData) {
+      return FutureBuilder<Map<String, dynamic>>(
+        future: _profileService
+            .fetchProfile(userData['uid'])
+            .then((profile) => profile ?? {'name': 'Unknown'}),
+        builder: (BuildContext context,
+            AsyncSnapshot<Map<String, dynamic>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else if (snapshot.hasData) {
+            return FutureBuilder<String?>(
+              future: _profileService.getLastMessage(userData['uid']),
+              builder: (context, messageSnapshot) {
+                // Check if there are messages before displaying 'No messages'
+                if (messageSnapshot.data == null) {
                   return UserTile(
-                    name: profileSnapshot.data!['name'] ?? 'Unknown',
+                    name: snapshot.data!['name'],
+                    lastMessage: "no",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => chat_page.ChatPage(
+                            receiverEmail: userData['email'],
+                            receiverID: userData['uid'],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return UserTile(
+                    name: snapshot.data!['name'],
                     lastMessage: messageSnapshot.data!,
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => chat_page.ChatPage(
-                            receiverEmail:
-                                profileSnapshot.data!['name'] ?? 'Unknown',
+                            receiverEmail: userData['email'],
                             receiverID: userData['uid'],
                           ),
                         ),
@@ -124,14 +142,15 @@ class HomePage extends StatelessWidget {
                     },
                   );
                 }
-                return Container();
               },
             );
+          } else {
+            return const Text('No data');
           }
-          return Container(); // Hide users without chat history
         },
       );
+    } else {
+      return Container();
     }
-    return Container();
   }
 }

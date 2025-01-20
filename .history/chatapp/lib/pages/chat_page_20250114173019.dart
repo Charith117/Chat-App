@@ -85,13 +85,6 @@ class _ChatPageState extends State<ChatPage> {
           return const Text("Loading ...");
         }
 
-        // scroll to bottom when new messages arrive
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (snapshot.data != null && snapshot.data!.docs.isNotEmpty) {
-            _scrollToBottom();
-          }
-        });
-
         // returns list view
         return ListView(
           controller: _scrollController,
@@ -166,10 +159,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    // Delay scrolling to bottom until after the first frame is rendered
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToBottom(); // Scroll to bottom when the chat is opened
-    });
+    _scrollToBottom();
     _scrollController.addListener(() {
       if (_scrollController.offset >=
               _scrollController.position.maxScrollExtent &&

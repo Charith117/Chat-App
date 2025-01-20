@@ -74,24 +74,23 @@ class ChatService {
         .delete();
   }
 
-  Stream<String?> getLastMessage(String receiverID) {
+  Future<String?> getLastMessage(String receiverID) async {
     final String currentUserID = _auth.currentUser!.uid;
     List<String> ids = [currentUserID, receiverID];
     ids.sort();
     String chatRoomID = ids.join('_');
 
-    return _firestore
+    final messages = await _firestore
         .collection("chat_rooms")
         .doc(chatRoomID)
         .collection("messages")
         .orderBy("timestamp", descending: true)
         .limit(1)
-        .snapshots()
-        .map((snapshot) {
-      if (snapshot.docs.isNotEmpty) {
-        return snapshot.docs.first.data()['message'];
-      }
-      return null;
-    });
+        .get();
+
+    if (messages.docs.isNotEmpty) {
+      return messages.docs.first.data()['message'];
+    }
+    return null;
   }
 }
