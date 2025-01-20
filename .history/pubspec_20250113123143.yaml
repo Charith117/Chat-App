@@ -1,0 +1,3 @@
+dependencies:
+  # ... other dependencies
+  firebase_storage: ^11.6.0 
