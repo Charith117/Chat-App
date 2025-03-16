@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ChatBubbleScaffold extends StatelessWidget {
-  const ChatBubbleScaffold({Key? key}) : super(key: key);
+  const ChatBubbleScaffold({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +30,10 @@ class ChatBubble extends StatefulWidget {
   final VoidCallback onDelete;
 
   const ChatBubble(
-      {Key? key,
+      {super.key,
       required this.message,
       required this.isCurrentUser,
-      required this.onDelete}) : super(key: key);
+      required this.onDelete});
 
   @override
   _ChatBubbleState createState() => _ChatBubbleState();
